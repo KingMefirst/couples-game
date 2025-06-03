@@ -57,42 +57,58 @@ function getRandomQuestions(array, count) {
 }
 
 export default function CouplesGame() {
-  const [selected, setSelected] = useState({});
+  const [currentRound, setCurrentRound] = useState(0);
+  const [playerQuestions, setPlayerQuestions] = useState({});
 
-  const drawQuestions = () => {
-    const newSelections = {};
-    for (let round in rounds) {
-      newSelections[round] = getRandomQuestions(rounds[round], 4);
+  const roundKeys = Object.keys(rounds);
+  const totalRounds = roundKeys.length;
+
+  const nextRound = () => {
+    if (currentRound < totalRounds) {
+      const round = roundKeys[currentRound];
+      const selectedQuestions = getRandomQuestions(rounds[round], 4);
+      setPlayerQuestions({
+        round,
+        player1: selectedQuestions[0],
+        player2: selectedQuestions[1],
+        extras: selectedQuestions.slice(2)
+      });
+      setCurrentRound(currentRound + 1);
     }
-    setSelected(newSelections);
   };
 
   return (
-    <div style={{ maxWidth: "800px", margin: "0 auto", padding: "2rem" }}>
+    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "2rem" }}>
       <h1 style={{ textAlign: "center" }}>Couples Game Night</h1>
-      <button
-        onClick={drawQuestions}
-        style={{
-          margin: "1rem auto",
-          display: "block",
-          padding: "0.5rem 1rem",
-          fontSize: "16px"
-        }}
-      >
-        Draw Questions
-      </button>
-      {Object.entries(selected).map(([round, questions]) => (
-        <div key={round} style={{ marginBottom: "2rem" }}>
-          <h2>{round}</h2>
-          <ul>
-            {questions.map((q, i) => (
-              <li key={i} style={{ marginBottom: "0.5rem" }}>
-                {q}
-              </li>
-            ))}
-          </ul>
+      {currentRound === 0 ? (
+        <button
+          onClick={nextRound}
+          style={{ margin: "1rem auto", display: "block", padding: "0.5rem 1rem", fontSize: "16px" }}
+        >
+          Start Game
+        </button>
+      ) : currentRound <= totalRounds ? (
+        <div>
+          <h2>Round {currentRound}: {playerQuestions.round}</h2>
+          <div style={{ marginBottom: "1rem" }}>
+            <strong>Player 1:</strong> {playerQuestions.player1}
+          </div>
+          <div style={{ marginBottom: "1rem" }}>
+            <strong>Player 2:</strong> {playerQuestions.player2}
+          </div>
+          <button
+            onClick={nextRound}
+            style={{ marginTop: "1rem", padding: "0.5rem 1rem", fontSize: "16px" }}
+          >
+            Next Round
+          </button>
         </div>
-      ))}
+      ) : (
+        <div style={{ textAlign: "center" }}>
+          <h2>Game Over</h2>
+          <p>Thanks for playing!</p>
+        </div>
+      )}
     </div>
   );
 }
